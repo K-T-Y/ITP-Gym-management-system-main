@@ -120,6 +120,7 @@ router.route("/get/:id").get((req,res)=>{
 //     })
 // })
 
+//search
 router.get("/search/:keyword", async (req, res) => {
     const { keyword } = req.params;
     try {

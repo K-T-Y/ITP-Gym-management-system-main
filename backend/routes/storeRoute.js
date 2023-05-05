@@ -103,6 +103,15 @@ router.route("/get/:id").get((req,res)=>{
         console.log(err);
     })
 })
-
+//search
+router.get("/search/:keyword", async (req, res) => {
+    const { keyword } = req.params;
+    try {
+      const eq = await Store.find({ item_name: keyword });
+      res.status(200).json(eq);
+    } catch (e) {
+      res.status(400).send(e.message);
+    }
+  });
 
 module.exports = router;
