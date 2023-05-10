@@ -53,29 +53,32 @@ export default function MealPlan() {
   });
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8020/meal/")
-      .then((response) => {
-        if (response) {
-          setItems(response.data);
-        } else {
-          toast.error("Error While Fetching Data!!");
-        }
-      })
-      .catch((error) => toast.error(error));
-  }, [items]);
+    getall();
+  }, []);
 
   const deleteItem = (id) => {
     axios
       .delete(`http://localhost:8020/meal/delete/${id} `)
       .then(() => {
         toast.error("Deleted Successfully!!");
+        getall();
       })
       .catch((err) => {
         alert(err);
       });
   };
-
+const getall=()=>{
+  axios
+  .get("http://localhost:8020/meal/")
+  .then((response) => {
+    if (response) {
+      setItems(response.data);
+    } else {
+      toast.error("Error While Fetching Data!!");
+    }
+  })
+  .catch((error) => toast.error(error));
+}
   function AddProduct(values) {
     console.log(values);
 
@@ -93,6 +96,7 @@ export default function MealPlan() {
       .then(() => {
         toast.success("Added Successfully!!");
         setIsNewOpen(false);
+        getall();
       })
       .catch(() => {
         toast.error("error!!");
@@ -131,8 +135,19 @@ export default function MealPlan() {
       .then((response) => {
         toast.success("update Successful");
         setIsOpen(false);
+        getall();
       });
   }
+
+ //Search Keyword
+const[keyword,setKeyword]=useState("");
+//Search Equipment
+const search=()=>{
+  axios.get(`http://localhost:8020/meal/search/${keyword}`).then((response)=>{
+    console.log(response);
+    setItems(response.data)
+  })
+}
   //Download Report 
  
   const savePDF = async () => {
@@ -145,15 +160,15 @@ export default function MealPlan() {
     var count = 0
 
     await axios
-      .get("http://localhost:8020/equipment")
+      .get("http://localhost:8020/meal")
       .then(res => {
         if (res.data) {
          
-      
+         
           console.log(res.data)
           data = res.data 
-          const headers = [["ID", "Equipment Code", "Equipment Name", "Type", "Year Of Made","Dimension","Last Service Day","Next Service Day"]];
-          const datas = res.data.map(elt => [++count, elt.Id, elt.name, elt.type, new Date(elt.YOM).getFullYear(),elt.dimension,elt.last_service_date,elt.next_service_date]);
+          const headers = [["ID", "User Id", "Age", "Gender", "Height","Weight","Diet Template","Health Label","Daily Meals"]];
+          const datas = res.data.map(elt => [++count, elt.empId, elt.age, elt.gender, elt.height,elt.weight,elt.dietTemplate,elt.healtLabel,elt.dailyMeals]);
           let content = {
             startY: 50,
             head: headers,
@@ -171,7 +186,7 @@ export default function MealPlan() {
         }
       })
 
-    doc.save("Equipmentreport.pdf")
+    doc.save("MealPlanreport.pdf")
   };
   return (
     <section className="table-auto overflow-y-scroll h-screen pb-10">
@@ -180,12 +195,12 @@ export default function MealPlan() {
       </div>
       <div className="w-full flrx gap-3">
         
-        <input  className=" ml-3 border border-grey-dark text-sm p-3 my-1 w-3/12  rounded-md " placeholder="Search"/>
-        <button className="ml-3  text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
-        <button onClick={()=>{savePDF()}} className="ml-3  text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Download Report</button>
-       
-
-      </div>
+        <input  className=" ml-3 border border-grey-dark text-sm p-3 my-1 w-3/12  rounded-md " onChange={(e)=>{setKeyword(e.target.value)}} placeholder="Search"/>
+          <button className="ml-3  text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={()=>search()}>Search</button>
+          <button onClick={()=>{savePDF()}} className="ml-3  text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Download Report</button>
+         
+  
+        </div>
       <div className="w-full flex flex-row-reverse px-10 mt-10">
         <button
           type="button"
